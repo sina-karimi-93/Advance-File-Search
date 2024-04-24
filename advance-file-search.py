@@ -5,12 +5,12 @@ Main module of this app.
 from lib import QApplication
 from lib import QMainWindow
 from lib import load_css
-from lib import MainFrame
+from lib import FMain
 from lib import CSS_COLORS_FILE_PATH
 from lib import CSS_FILE_PATH
 
 
-class MainWindow(QMainWindow):
+class WMain(QMainWindow):
     """
     Main Window of the app.
     """
@@ -26,9 +26,8 @@ class MainWindow(QMainWindow):
         Initializes the main frame and other
         widgets.
         """
-
-        self.main_frame = MainFrame()
-        self.setCentralWidget(self.main_frame)
+        self.fmain = FMain()
+        self.setCentralWidget(self.fmain)
     
     def setup_window(self) -> None:
         """
@@ -45,7 +44,7 @@ def run_app() -> None:
     of the main window to show the GUI.
     """
     app = QApplication([])
-    window = MainWindow()
+    window = WMain()
     window.show()
     app.exec_()
 

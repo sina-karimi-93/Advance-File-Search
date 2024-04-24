@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import QScrollArea
 from PyQt5.QtWidgets import QGroupBox
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QHeaderView
+from PyQt5.QtWidgets import QCheckBox
 from PyQt5.QtWidgets import QFrame
 from PyQt5.QtWidgets import QListWidget
 from PyQt5.QtWidgets import QCompleter
@@ -1816,6 +1817,75 @@ class ListBox(QListWidget):
         for i in range(self.count()):
             item = self.item(i)
             item.setSelected(False)
+
+
+class CheckBox(QCheckBox):
+    """
+    Custom QtCheckbox widget
+    """
+
+    def __init__(self,
+                 label: str,
+                 callback_func: object = void_function,
+                 icon_path: str = None,
+                 icon_size: tuple = (15, 15),
+                 icon_object: QIcon = None,
+                 icon_size_object: QSize = None,
+                 is_checked: bool = False,
+                 object_name: str = None,
+                 grid_positions: tuple = None,
+                 **kwargs) -> None:
+        super().__init__(label, **kwargs)
+        self.setChecked(is_checked)
+        self.stateChanged.connect(callback_func)
+        self.stateChanged.connect(self.on_valid)
+        # self.setCheckState(Qt.Checked)
+        self.setObjectName(object_name)
+        self.setCursor(QCursor(Qt.PointingHandCursor))
+        if icon_object:
+            self.setIcon(icon_object)
+            self.setIconSize(icon_size_object)
+        else:
+            self.setIcon(QIcon(icon_path))
+            self.setIconSize(QSize(*icon_size))
+        self.grid_positions = grid_positions
+
+    def get_value(self) -> bool:
+        """
+        return state of the check box
+        """
+        return self.isChecked()
+
+    def get_state(self) -> bool:
+        """
+        Return state of the check box
+        """
+        return self.isChecked()
+
+    def change_state(self, state: int = 2) -> None:
+        """
+        Change state of the checkbox
+        -> Params:
+               states: 0 -> unchecked
+                       1 -> partially checked
+                       2 -> checked
+        """
+        self.setCheckState(state)
+        self.setObjectName("valid")
+
+    def on_valid(self) -> None:
+        """
+        change the css object name on when is unchecked
+        """
+        self.setObjectName("valid")
+
+    def on_invalid(self) -> None:
+        """
+        change the css object name on when is unchecked
+        """
+        self.setObjectName("invalid")
+
+
 
 class DateEntry(Frame):
 
