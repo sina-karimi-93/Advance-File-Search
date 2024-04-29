@@ -34,7 +34,8 @@ class WMain(QMainWindow):
         Setup window configuration
         """
 
-        self.setGeometry(300, 300, 1000, 600)
+        self.setGeometry(600, 400, 1300, 700)
+        self.setMinimumSize(1300, 700)
         self.setWindowTitle("ADS")
         self.setStyleSheet(self.theme)
 

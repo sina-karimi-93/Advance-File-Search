@@ -1,7 +1,11 @@
 QWidget {
-    font-family: 'Calibry';
+    background-color: --color1;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+QFrame#fmain {
     background-color: --color0;
-    font-size: 12px;
 }
 
 QFrame {
@@ -26,13 +30,11 @@ QFrame#fresult {
 
 QLabel {
     color: --color4;
-    font-weight: 1000;
 }
 
 
 QLineEdit {
     font-size: 13px;
-    font-family: 'Calibry';
     font-weight: 1000;
     color: --color4;
     background-color: --color1;
@@ -42,7 +44,7 @@ QLineEdit {
     padding-bottom: 5px;
     padding-left: 5px;
     padding-right: 5px;
-    selection-color: --color4;
+    selection-color: --color1;
     selection-background-color: --color5;
 }
 
@@ -73,28 +75,29 @@ QPushButton:hover {
 /* ============================ SCROLLAREA ============================ */
 QScrollArea {
     border: none;
+    background-color: --color1;
 }
 
 QScrollBar::add-page,
 QScrollBar::sub-page {
-    background: transparent;
+    background-color: --color1;
 }
 
 QScrollBar {
     height: 15px;
-    width: 15px;
-    background: transparent;
-    margin-left: 2px;
+    width: 17px;
+    background-color: --color1;
+    margin-left: 5px;
 }
 
 QScrollBar::handle {
-    min-height: 40px;
-    background: --color7;
+    min-height: 30px;
+    background: --color3;
     border-radius: 6px;
 }
 
 QScrollBar::handle:hover {
-    background: --color4;
+    background: --color5;
 }
 
 QScrollBar::add-line {
@@ -107,75 +110,48 @@ QScrollBar::sub-line {
 
 
 /* ============================ TABLE ============================ */
-QTableCornerButton::section {
-    background-color: transparent;
-}
 
-QHeaderView {
-    font-weight: bold;
+QTableCornerButton::section {
+    background-color: --color3;
+    border-top-left-radius: 20px;
 }
 
 QHeaderView::section {
     color: white;
-    background-color: transparent;
+    background-color: --color3;
+    outline: none;
+    border: none;
     padding: 2px 1px;
-    padding-left: 5px;
+    padding-left: 7px;
+    padding-right: 3px;
 }
 
+QTableWidget {
+    background-color: --color1;
+}
 
 QTableView {
     border-radius: 5px;
     outline: none;
+    gridline-color: --color3;
+    background-color: --color1;
 }
 
 
 QTableView::item {
-    color: white;
-    background-color: --color2;
+    color: --color4;
+    background-color: --color6;
+    border: none;
+    outline: none;
 }
 
 QTableView::item:selected {
-    color: --color1;
-    background: --color5;
+    color: --color4;
+    background: --color1;
 }
 
 
-/* ============================ TAB ============================ */
-
-QTabWidget::pane {
-    border: 2px solid #153b4d;
-    border-radius: 5px;
-}
-
-
-QTabBar::tab {
-    color: #303030;
-    background: rgb(194, 194, 194);
-    font-weight: bold;
-    border: none;
-    padding: 3px 0px;
-    width: 127px;
-}
-
-QTabWidget#database_viewer::pane {
-    border: none;
-}
-
-QTabBar#database_viewer::tab {
-    width: 200px;
-}
-
-
-QTabBar::tab:hover {
-    background: #a7bbb7;
-}
-
-QTabBar::tab:selected {
-    color: white;
-    font-weight: bold;
-    background: #00614e;
-}
-
+/* ============================ QCHECKBOX ============================ */
 
 QCheckBox {
     color: --color4;

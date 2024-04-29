@@ -9,6 +9,7 @@ from .widgets import Horizontal
 from .widgets import Vertical
 from .widgets import LabelEntry
 from .widgets import Button
+from .widgets import HorizontalTable
 from .widgets import CheckBox
 from .widgets import QFileDialog
 
@@ -20,7 +21,7 @@ class FMain(Frame):
     """
     def __init__(self) -> None:
         super().__init__(layout=Horizontal)
-
+        self.setObjectName("fmain")
         self.init_widgets()
     
     def init_widgets(self) -> None:
@@ -54,18 +55,18 @@ class FCriteria(Frame):
         """
         Initializes the widgets and frames.
         """
-        self.targets_entry = LabelEntry(label="TARGETS",
-                                        effect_color="#009187",
-                                        effect_blur_radius=20)
-        
-        self.search_path_entry = LabelEntry(label="SEARCH PATH",
-                                            effect_color="#009187",
-                                            effect_blur_radius=20,
-                                            max_length=10000)
-        
         self.select_path_button = Button(label="SELECT PATH",
                                          callback_function=self.open_get_location,
                                          width=250)
+        self.targets_entry = LabelEntry(label="TARGETS",
+                                        effect_color="#009187",
+                                        effect_blur_radius=10)
+        
+        self.search_path_entry = LabelEntry(label="SEARCH PATH",
+                                            effect_color="#009187",
+                                            effect_blur_radius=10,
+                                            max_length=10000)
+        
         
         self.add_stretch()
 
@@ -76,12 +77,12 @@ class FCriteria(Frame):
                                                default_value=10,
                                                tool_tip="Size in megabyte. Note that specifying large file size can slow the machine.",
                                                effect_color="#009187",
-                                               effect_blur_radius=20)
+                                               effect_blur_radius=10)
         
         self.extensions_entry = LabelEntry(label="EXTENSIONS",
                                            place_holder="txt, json, csv",
                                            effect_color="#009187",
-                                           effect_blur_radius=20)
+                                           effect_blur_radius=10)
 
     def open_get_location(self) -> None:
         """
@@ -113,3 +114,8 @@ class FResult(Frame):
         """
         Initializes the widgets and frames.
         """
+        self.table = HorizontalTable(editable=True)
+        self.table.insert_data(["Directory","Names","In File"],
+                               [{"Directory": "E:\Test Directory\Another Test Directory\Test\Tests\Codes",
+                                 "Files": "main.py\ntest.py\ndata.json",
+                                 "In File": "readme.txt\nseeme.txt\nfindme.csv\nmoveme.json"}]*100)

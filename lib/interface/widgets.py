@@ -1605,7 +1605,6 @@ class HorizontalTable(Table):
                 data
                 row: row number default is 0
         """
-        data[-1] = datetime.strftime(data[-1], DATE_FORMAT)
         c_count = self.columnCount()
         for value, column in zip(data, range(c_count)):
             if width:
@@ -1636,6 +1635,8 @@ class HorizontalTable(Table):
                         column_count=len(headers),
                         has_width=width)
         for row_index, document in enumerate(data):
+            self.setRowHeight(row_index, 70)
+
             value = list(document.values())
             self.insert_row(data=value,
                             width=width,
