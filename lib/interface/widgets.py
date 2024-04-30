@@ -43,6 +43,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtCore import QSortFilterProxyModel
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import QObject
 from lib.errors import DataValidationFailed, RowNotExists, TableCellNotFoundError
 from .utils import log
 from .utils import void_function

@@ -33,24 +33,22 @@ QLabel {
     color: --color4;
 }
 
-
 QLineEdit {
+    border: none;
+    selection-color: --color1;
+    selection-background-color: --color5;
+}
+
+QLineEdit#criteria {
     font-size: 13px;
     font-weight: 1000;
     color: --color4;
     background-color: --color1;
     border: none;
     border-radius: 13px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 5px;
     selection-color: --color1;
     selection-background-color: --color5;
-}
-
-QLineEdit::hover {
-    border: 1px solid --color5;
 }
 
 QPushButton {
@@ -144,6 +142,8 @@ QTableView::item {
     background-color: --color6;
     border: none;
     outline: none;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 QTableView::item:selected {
