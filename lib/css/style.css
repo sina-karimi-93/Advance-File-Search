@@ -24,6 +24,7 @@ QFrame#fresult {
     margin-right: 5px;
     margin-left: 5px;
     background-color: --color1;
+    padding: 7px;
 
 }
 
@@ -48,8 +49,8 @@ QLineEdit {
     selection-background-color: --color5;
 }
 
-QLineEdit#entry {
-    border-radius: 13px;
+QLineEdit::hover {
+    border: 1px solid --color5;
 }
 
 QPushButton {
@@ -118,12 +119,12 @@ QTableCornerButton::section {
 
 QHeaderView::section {
     color: white;
+    font-size: 12px;
     background-color: --color3;
     outline: none;
     border: none;
-    padding: 2px 1px;
-    padding-left: 7px;
-    padding-right: 3px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 QTableWidget {
@@ -133,7 +134,7 @@ QTableWidget {
 QTableView {
     border-radius: 5px;
     outline: none;
-    gridline-color: --color3;
+    gridline-color: --color5;
     background-color: --color1;
 }
 

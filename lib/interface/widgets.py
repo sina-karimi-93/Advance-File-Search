@@ -1593,6 +1593,7 @@ class HorizontalTable(Table):
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
         if not has_width:
             self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.verticalHeader().hide()
 
     def insert_row(self, 
                    data: list,
@@ -1635,7 +1636,7 @@ class HorizontalTable(Table):
                         column_count=len(headers),
                         has_width=width)
         for row_index, document in enumerate(data):
-            self.setRowHeight(row_index, 70)
+            self.setRowHeight(row_index, 75)
 
             value = list(document.values())
             self.insert_row(data=value,

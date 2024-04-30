@@ -83,6 +83,10 @@ class FCriteria(Frame):
                                            place_holder="txt, json, csv",
                                            effect_color="#009187",
                                            effect_blur_radius=10)
+        
+        self.clear_result_button = Button(label="Clear Result",
+                                          callback_function=self.open_get_location,
+                                          width=250)
 
     def open_get_location(self) -> None:
         """
