@@ -164,8 +164,9 @@ class FCriteria(Frame):
         paths = self.search_path_entry.get_value()
         criteria["paths"] = paths.split(",")
 
-        do_search_files = self.search_in_files_checkbox.get_value()
-        if do_search_files:
+        in_file_search = self.search_in_files_checkbox.get_value()
+        if in_file_search:
+            criteria["in_file_search"] = in_file_search
             max_file_size = self.max_file_size_entry.get_value()
             if max_file_size > 100:
                 MessageBox(self, "high", "Error",
@@ -188,6 +189,7 @@ class FResult(Frame):
     def __init__(self) -> None:
         super().__init__(layout=Horizontal)
         self.setup_frame()
+        self.init_widgets()
 
     def setup_frame(self) -> None:
         """
@@ -204,18 +206,20 @@ class FResult(Frame):
         """"""
         self.dir_name = HorizontalTable(editable=True)
         self.dir_name.setup_view(h_headers=["Directory Name"],
-                                 row_count=1,
+                                 row_count=0,
                                  column_count=1)
         
         self.file_name = HorizontalTable(editable=True)
         self.file_name.setup_view(h_headers=["File Name"],
-                                 row_count=1,
+                                 row_count=0,
                                  column_count=1)
         
         self.in_file = HorizontalTable(editable=True)
         self.in_file.setup_view(h_headers=["In File"],
-                                 row_count=1,
+                                 row_count=0,
                                  column_count=1)
+        
+        
 
     def show_data(self, data: dict) -> None:
         """

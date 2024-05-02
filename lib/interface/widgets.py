@@ -1609,7 +1609,6 @@ class HorizontalTable(Table):
         """
         c_count = self.columnCount()
         for value, column in zip(value, range(c_count)):
-            log(value, color="yellow")
             item = QTableWidgetItem(str(value))
             self.setItem(row, column, item)
 

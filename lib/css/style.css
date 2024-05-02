@@ -139,7 +139,7 @@ QTableView {
 
 
 QTableView::item {
-    color: --color4;
+    color: --color8;
     background-color: --color6;
     border: none;
     outline: none;

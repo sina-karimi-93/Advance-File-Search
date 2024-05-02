@@ -160,6 +160,7 @@ log = Logger()
 class Search:
     
     def __init__(self,
+                 in_file_search: bool,
                  file_size_limit: float = 30,
                  extensions: list = []) -> None:
         """
@@ -169,6 +170,7 @@ class Search:
                 Limit of file size that it should search
                 inside the file. It's in Megabyte
         """
+        self.in_file_search = in_file_search
         self.file_size_limit = file_size_limit
         self.extensions = extensions
     
@@ -277,6 +279,8 @@ class Search:
                 continue
             if self.compare(file_name, target):
                 yield {"file_name": full_path.replace("\\","/")}
+            if not self.in_file_search:
+                continue
             try:
                 with open(full_path, "r") as file:
                     if target.lower() in file.read().lower():
@@ -396,6 +400,7 @@ class SearchWorkers:
 def search(targets: list,
            paths: list,
            signal_callback: Callable,
+           in_file_search:bool = False,
            max_file_size: float = 20,
            extensions: list = [],
            threads_count: int = 16) -> dict:
@@ -416,7 +421,8 @@ def search(targets: list,
     <- Return
         dict
     """
-    search = Search(file_size_limit=max_file_size,
+    search = Search(in_file_search=in_file_search,
+                    file_size_limit=max_file_size,
                     extensions=extensions)
     paths = search.get_paths(paths=paths)
     workers = SearchWorkers(threads_count=threads_count,
