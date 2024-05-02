@@ -234,7 +234,7 @@ class Search:
             return
         for target in targets:
             if self.compare(dir_path, target):
-                yield ("dir_names", dir_path.replace("\\","/"))
+                yield {"dir_name": dir_path.replace("\\","/")}
             yield from self.check_files(dir_path, file_names, target)
 
     def compare(self, path: str, target: str) -> bool:
@@ -276,11 +276,11 @@ class Search:
             if file_size > self.file_size_limit:
                 continue
             if self.compare(file_name, target):
-                yield ("file_names", full_path.replace("\\","/"))
+                yield {"file_name": full_path.replace("\\","/")}
             try:
                 with open(full_path, "r") as file:
                     if target.lower() in file.read().lower():
-                        yield ("files", full_path)
+                        yield {"in_file": full_path}
             except UnicodeDecodeError:
                 pass
 
@@ -317,12 +317,12 @@ class Search:
 class SearchWorkers:
 
     def __init__(self,
-                 threads_count: int = 16,
-                 finds_container: dict = dict()) -> None:
+                 signal_callback: Callable,
+                 threads_count: int = 16) -> None:
         self.is_searching = False
         self.threads_count = threads_count
         self.lock = Lock()
-        self.finds_container = finds_container
+        self.signal_callback = signal_callback
     
     def search(self,
                targets: list,
@@ -343,11 +343,6 @@ class SearchWorkers:
         for thread in threads:
             thread.daemon = True
             thread.start()
-        
-        for thread in threads:
-            thread.join()
-        
-        return self.finds_container
     
     def worker(self,
                search_handler: Callable,
@@ -385,15 +380,10 @@ class SearchWorkers:
                 (find type, path)
         """
         try:
-            result = tuple(next(result))
-            _type = result[0]
-            value = result[1]
-            self.finds_container[_type].add(value)
+            result = dict(next(result))
+            self.signal_callback(result)
         except StopIteration:
             pass
-        except KeyError:
-            self.finds_container[_type] = {value}
-
 
     def stop_searching(self) -> None:
         """
@@ -405,7 +395,7 @@ class SearchWorkers:
 
 def search(targets: list,
            paths: list,
-           finds_container: dict,
+           signal_callback: Callable,
            max_file_size: float = 20,
            extensions: list = [],
            threads_count: int = 16) -> dict:
@@ -430,24 +420,8 @@ def search(targets: list,
                     extensions=extensions)
     paths = search.get_paths(paths=paths)
     workers = SearchWorkers(threads_count=threads_count,
-                            finds_container=finds_container)
+                            signal_callback=signal_callback)
     result = workers.search(targets=targets,
                             search_handler=search.search_directory,
                             paths=paths)
     return result
-
-if __name__ == "__main__":
-    os.system("cls")
-    finds = dict()
-    start = time.time()
-
-    search(targets=["voila", "AEra"],
-           paths=["E:/"],
-           finds_container=finds,
-           max_file_size=15,
-           extensions=[".txt", ".json"],
-           threads_count=8)
-    
-    end = time.time()
-    log(finds, pretty=True, color="yellow")
-    log(end-start, " Seconds", color="red")

@@ -1550,7 +1550,7 @@ class Table(QTableWidget):
 class HorizontalTable(Table):
 
     def __init__(self,
-                 min_width: int = 600,
+                 min_width: int = 300,
                  min_height: int = 200,
                  table_number: int = 0,
                  object_name: str = None,
@@ -1598,8 +1598,7 @@ class HorizontalTable(Table):
         self.verticalHeader().hide()
 
     def insert_row(self, 
-                   data: list,
-                   width: Any,
+                   value: list,
                    row: int = 0) -> None:
         """
         insert the given data row by row, it will clear
@@ -1609,14 +1608,8 @@ class HorizontalTable(Table):
                 row: row number default is 0
         """
         c_count = self.columnCount()
-        for value, column in zip(data, range(c_count)):
-            if width:
-                try:
-                    self.setColumnWidth(column, width[column])
-                except TypeError:
-                    self.setColumnWidth(column, width)
-                except IndexError:
-                    pass
+        for value, column in zip(value, range(c_count)):
+            log(value, color="yellow")
             item = QTableWidgetItem(str(value))
             self.setItem(row, column, item)
 
@@ -1857,12 +1850,6 @@ class CheckBox(QCheckBox):
     def get_value(self) -> bool:
         """
         return state of the check box
-        """
-        return self.isChecked()
-
-    def get_state(self) -> bool:
-        """
-        Return state of the check box
         """
         return self.isChecked()
 

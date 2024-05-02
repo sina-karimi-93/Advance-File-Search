@@ -4,20 +4,21 @@ QWidget {
     font-weight: bold;
 }
 
-QFrame#fmain {
-    background-color: --color0;
-}
-
 QFrame {
     background-color: transparent;
-    border-radius: 20px;
 }
+
+QFrame#fmain {
+    background-color: --color7;
+    padding: 3px 5px;
+}
+
 
 QFrame#fcriteria {
     margin-right: 5px;
     margin-left: 5px;
     background-color: --color1;
-
+    border-radius: 20px;
 }
 
 QFrame#fresult {
@@ -25,7 +26,7 @@ QFrame#fresult {
     margin-left: 5px;
     background-color: --color1;
     padding: 7px;
-
+    border-radius: 20px;
 }
 
 
