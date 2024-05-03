@@ -3,7 +3,7 @@ This module is for searching through files, folders
 for the result.
 """
 import os
-import time
+from time import sleep
 from typing import Callable
 from typing import Generator
 from traceback import print_tb
@@ -281,10 +281,12 @@ class Search:
                 yield {"file_name": full_path.replace("\\","/")}
             if not self.in_file_search:
                 continue
+            sleep(0.05)
             try:
                 with open(full_path, "r") as file:
                     if target.lower() in file.read().lower():
                         yield {"in_file": full_path}
+                
             except UnicodeDecodeError:
                 pass
 
