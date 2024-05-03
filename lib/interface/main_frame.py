@@ -5,7 +5,7 @@ show the widgets
 """
 
 from typing import Callable
-from .widgets import Frame
+from .widgets import Frame, TextAnimation
 from .widgets import Horizontal
 from .widgets import Vertical
 from .widgets import LabelEntry
@@ -39,7 +39,7 @@ class FMain(Frame):
         Initializes the frames and widgets.
         """
         self.fresult = None
-        self.fcriteria = FCriteria(self.search, self.clear_result)
+        self.fcriteria = FCriteria(self.search, self.stop_search, self.clear_result)
         self.fresult = FResult()
     
     def clear_result(self) -> None:
@@ -61,6 +61,7 @@ class FMain(Frame):
         targets = criteria.pop("targets")
         paths = criteria.pop("paths")
         self.search_process = SearchProcess(signal_callback=self.provider.get_search_result,
+                                            finish_search_callback=self.fcriteria.stop_search_animation,
                                             **criteria)
         self.search_process.search(targets=targets,
                                    paths=paths)
@@ -69,6 +70,10 @@ class FMain(Frame):
         """
         Stop searching process.
         """
+        try:
+            self.search_process.stop_searching()
+        except AttributeError:
+            pass
 
 class FCriteria(Frame):
     """
@@ -78,9 +83,11 @@ class FCriteria(Frame):
     """
     def __init__(self,
                  search_callback: Callable,
+                 stop_search_callback: Callable,
                  clear_result_callback: Callable) -> None:
         super().__init__(layout=Vertical)
         self.search_callback = search_callback
+        self.stop_search_callback = stop_search_callback
         self.clear_result_callback = clear_result_callback
         self.setup_frame()
         self.init_widgets(clear_result_callback)
@@ -139,9 +146,17 @@ class FCriteria(Frame):
                                            object_name="criteria",
                                            effect_blur_radius=10)
         self.add_stretch()
+
+        self.loading_animation = TextAnimation(parent=self,
+                                               text="SEARCHING",
+                                               frame_size=(220, 50),
+                                               speed=40)
         
         self.search_button = Button(label="SEARCH",
                                     callback_function=self.search_button_callback,
+                                    width=250)
+        self.stop_search_button = Button(label="STOP SEARCH",
+                                    callback_function=self.stop_search_button_callback,
                                     width=250)
         
 
@@ -184,6 +199,21 @@ class FCriteria(Frame):
                 criteria["extensions"] = extensions
         self.clear_result_callback()
         self.search_callback(criteria)
+        self.loading_animation.start()
+
+    def stop_search_button_callback(self) -> None:
+        """
+        Callback method to stop searching process
+        and stop search animation.
+        """
+        self.stop_search_callback()
+
+    def stop_search_animation(self) -> None:
+        """
+        Stop search animation
+        """
+        self.loading_animation.stop()
+
 
 
 class FResult(Frame):

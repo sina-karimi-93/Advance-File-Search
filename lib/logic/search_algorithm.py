@@ -271,8 +271,6 @@ class Search:
             Generator
         """
         for file_name in file_names:
-            if not self.is_valid_extension(file_name):
-                continue
             full_path = f"{dir_path}/{file_name}"
             file_size = self.get_file_size(full_path)
             if file_size > self.file_size_limit:
@@ -281,7 +279,9 @@ class Search:
                 yield {"file_name": full_path.replace("\\","/")}
             if not self.in_file_search:
                 continue
-            sleep(0.01)
+            sleep(0.05)
+            if not self.is_valid_extension(file_name):
+                continue
             try:
                 with open(full_path, "r") as file:
                     if target.lower() in file.read().lower():
@@ -324,11 +324,13 @@ class SearchWorkers:
 
     def __init__(self,
                  signal_callback: Callable,
+                 finish_search_callback: Callable,
                  threads_count: int = 16) -> None:
         self.is_searching = False
         self.threads_count = threads_count
         self.lock = Lock()
         self.signal_callback = signal_callback
+        self.finish_search_callback = finish_search_callback
     
     def search(self,
                targets: list,
@@ -375,6 +377,7 @@ class SearchWorkers:
                 self.add_to_finds(result)
             except StopIteration:
                 break
+        self.finish_search_callback()
     
     def add_to_finds(self, result: Generator) -> None:
         """
@@ -407,6 +410,7 @@ class SearchProcess:
     """
     def __init__(self,
                  signal_callback: Callable,
+                 finish_search_callback: Callable,
                  in_file_search:bool = False,
                  max_file_size: float = 20,
                  extensions: list = [],
@@ -424,7 +428,8 @@ class SearchProcess:
                                      file_size_limit=max_file_size,
                                      extensions=extensions)
         self.workers = SearchWorkers(threads_count=threads_count,
-                                     signal_callback=signal_callback)
+                                     signal_callback=signal_callback,
+                                     finish_search_callback=finish_search_callback)
     
     def search(self,
                targets: list,

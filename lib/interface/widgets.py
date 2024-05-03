@@ -33,6 +33,7 @@ from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QDateEdit
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5.QtGui import QCursor
 from PyQt5.QtGui import QColor
 from PyQt5.QtGui import QIntValidator
@@ -43,6 +44,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtCore import QSortFilterProxyModel
+from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QObject
 from lib.errors import DataValidationFailed, RowNotExists, TableCellNotFoundError
@@ -1925,6 +1927,127 @@ class Stretch(QWidget):
                  vertical_stretch: QSizePolicy = QSizePolicy.Preferred) -> None:
         super().__init__()
         self.setSizePolicy(horizontal_stretch, vertical_stretch)
+
+
+class TextAnimation(Frame):
+    """
+    Contains widgets, animations and methods
+    to show LUMENWERX in an animation way.
+    """
+    START_VALUE = 0.1
+    END_VALUE = 1
+
+    def __init__(self,
+                 parent: object,
+                 text: str,
+                 frame_size: tuple = (260, 40),
+                 speed: int = 50) -> None:
+        super().__init__(parent=parent, layout=Horizontal)
+        self.setHidden(True)
+        self.setObjectName("text-animation")
+        self.setFixedSize(*frame_size)
+        self.text = text
+        self.is_reverse = False
+        self.charracter_index = -1
+        self.duration = speed
+        self.create_charracter_animation(text=text)
+        self.is_running = False
+
+    def get_next_charracter_index(self) -> None:
+        """
+        Increament a counter until it be equal to
+        the length of the text. It helps animation
+        to animate each charracter of the text.
+        """
+        self.charracter_index += 1
+        if self.charracter_index == len(self.text):
+            self.charracter_index = 0
+            self.reverse_animation()
+        return self.charracter_index
+
+    def start(self) -> None:
+        """
+        Start the animations.
+        """
+        if self.is_running:
+            return
+        self.is_running = True
+        self.set_animation_properties(self.START_VALUE, self.END_VALUE)
+        self.setHidden(False)
+        self.set_animation_finish_callback()
+
+    def stop(self) -> None:
+        """
+        Stop the animations
+        """
+        if not self.is_running:
+            return
+        self.is_running = False
+        self.setHidden(True)
+        self.animation.stop()
+        self.charracter_index = -1
+        self.is_reverse = False
+        for index, _ in enumerate(self.text, start=0):
+            effect = getattr(self, f"effect{index}")
+            effect.setOpacity(self.START_VALUE)
+
+    def create_charracter_animation(self, text: str) -> None:
+        """
+        For each charracter in LUMENWERX create a label,
+        effect and animation, so we can make them blink
+        separately.
+        """
+        for index, char in enumerate(text, start=0):
+            label = Label(char, object_name="loading-animation")
+            effect = QGraphicsOpacityEffect(self, opacity=self.START_VALUE)
+            label.setGraphicsEffect(effect)
+            setattr(self, f"label{index}", label)
+            setattr(self, f"effect{index}", effect)
+        
+
+    def set_animation_finish_callback(self) -> None:
+        """
+        Callback method whenever the animation finishes
+        its job. It will switch its target(label effect)
+        and start again with animating new target.
+        """
+        effect_index = self.get_next_charracter_index()
+        self.animation.setTargetObject(getattr(self, f"effect{effect_index}"))
+        self.animation.start()
+
+    def reverse_animation(self) -> None:
+        """
+        This method calls when the last charracter
+        animation is finished. It change the animations
+        properties.
+        """
+        if self.is_reverse:
+            self.set_animation_properties(start_value=self.START_VALUE,
+                                          end_value=self.END_VALUE)
+            self.is_reverse = False
+            return
+        self.set_animation_properties(start_value=self.END_VALUE,
+                                      end_value=self.START_VALUE)
+        self.is_reverse = True
+
+    def set_animation_properties(self,
+                                 start_value: float,
+                                 end_value: float) -> None:
+        """
+        Set start value and end value for the animation.
+        """
+        self.animation = QPropertyAnimation(parent=self,
+                                            targetObject=self.effect0,
+                                            propertyName=b'opacity',
+                                            startValue=self.START_VALUE,
+                                            endValue=self.END_VALUE,
+                                            duration=self.duration,
+                                            loopCount=1)
+        self.animation.finished.connect(self.set_animation_finish_callback)
+        self.animation.setStartValue(start_value)
+        self.animation.setEndValue(end_value)
+
+
 
 WIDGETS_LIST = {
     "entry": LabelEntry,
