@@ -44,7 +44,7 @@ class Logger:
                  *args,
                  pretty: bool = False,
                  level: str = 1,
-                 color: str = "default",
+                 color: str = "yellow",
                  **kwargs):
         """
         debug print the args and error traceback base on the detail level
@@ -281,7 +281,7 @@ class Search:
                 yield {"file_name": full_path.replace("\\","/")}
             if not self.in_file_search:
                 continue
-            sleep(0.05)
+            sleep(0.01)
             try:
                 with open(full_path, "r") as file:
                     if target.lower() in file.read().lower():
@@ -398,38 +398,50 @@ class SearchWorkers:
         """
         self.is_searching = False
 
-
-def search(targets: list,
-           paths: list,
-           signal_callback: Callable,
-           in_file_search:bool = False,
-           max_file_size: float = 20,
-           extensions: list = [],
-           threads_count: int = 16) -> dict:
+class SearchProcess:
     """
     Search for the targets in the given paths
     from up to down of the directories and files
     and inside the files with specific criteria
     such as the maximum file size or its extension.
-    -----------------------------------------------
-    -> Params
-        targets: list of string,
-        paths: list of string
-        finds_container: dict
-        max_file_size: float
-        extensions: list of string
-        threads_count: int
-            number of threads spawn
-    <- Return
-        dict
     """
-    search = Search(in_file_search=in_file_search,
-                    file_size_limit=max_file_size,
-                    extensions=extensions)
-    paths = search.get_paths(paths=paths)
-    workers = SearchWorkers(threads_count=threads_count,
-                            signal_callback=signal_callback)
-    result = workers.search(targets=targets,
-                            search_handler=search.search_directory,
+    def __init__(self,
+                 signal_callback: Callable,
+                 in_file_search:bool = False,
+                 max_file_size: float = 20,
+                 extensions: list = [],
+                 threads_count: int = 16) -> None:
+        """
+        -----------------------------------------------
+        -> Params
+            finds_container: dict
+            max_file_size: float
+            extensions: list of string
+            threads_count: int
+            number of threads spawn
+        """
+        self.search_handler = Search(in_file_search=in_file_search,
+                                     file_size_limit=max_file_size,
+                                     extensions=extensions)
+        self.workers = SearchWorkers(threads_count=threads_count,
+                                     signal_callback=signal_callback)
+    
+    def search(self,
+               targets: list,
+               paths: list) -> None:
+        """
+        ----------------------------------------
+        -> Params
+            targets: list of string,
+            paths: list of string
+        """
+        paths = self.search_handler.get_paths(paths=paths)
+        self.workers.search(targets=targets,
+                            search_handler=self.search_handler.search_directory,
                             paths=paths)
-    return result
+    
+    def stop_searching(self) -> None:
+        """
+        Stop searching process.
+        """
+        self.workers.stop_searching()

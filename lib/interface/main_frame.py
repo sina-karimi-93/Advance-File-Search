@@ -18,7 +18,7 @@ from .widgets import QColor
 from .widgets import pyqtSignal
 from .widgets import QObject
 from .widgets import MessageBox
-from ..logic.search_algorithm import search
+from lib.logic.search_algorithm import SearchProcess
 
 
 
@@ -58,8 +58,12 @@ class FMain(Frame):
         -> Params
             criteria: dict
         """
-        search(signal_callback=self.provider.get_search_result,
-               **criteria)
+        targets = criteria.pop("targets")
+        paths = criteria.pop("paths")
+        self.search_process = SearchProcess(signal_callback=self.provider.get_search_result,
+                                            **criteria)
+        self.search_process.search(targets=targets,
+                                   paths=paths)
     
     def stop_search(self) -> None:
         """
@@ -224,8 +228,6 @@ class FResult(Frame):
                                  row_count=0,
                                  column_count=1)
         
-        
-
     def show_data(self, data: dict) -> None:
         """
         Show the data in the table. It adds a
@@ -242,8 +244,6 @@ class FResult(Frame):
         table.insert_row(value=[value], row=rows_count)
 
 
-
-    
     def clear_result(self) -> None:
         """
         Clears the table data.
