@@ -77,6 +77,7 @@ class FCriteria(Frame):
                  clear_result_callback: Callable) -> None:
         super().__init__(layout=Vertical)
         self.search_callback = search_callback
+        self.clear_result_callback = clear_result_callback
         self.setup_frame()
         self.init_widgets(clear_result_callback)
 
@@ -177,6 +178,7 @@ class FCriteria(Frame):
             if extensions:
                 extensions = extensions.split(",")
                 criteria["extensions"] = extensions
+        self.clear_result_callback()
         self.search_callback(criteria)
 
 
@@ -203,7 +205,10 @@ class FResult(Frame):
         self.setGraphicsEffect(effect)
 
     def init_widgets(self) -> None:
-        """"""
+        """
+        Initializes the tables for each group
+        of data.
+        """
         self.dir_name = HorizontalTable(editable=True)
         self.dir_name.setup_view(h_headers=["Directory Name"],
                                  row_count=0,
