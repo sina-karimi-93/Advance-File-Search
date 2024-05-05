@@ -41,37 +41,18 @@ class GUIBaseException(Exception):
                 "type": self.__class__.__name__}
 
 
-
-class CommaError(GUIBaseException):
-    """
-    Raise when last item of an entry or combobox
-    is comma.
-    """
-
-
 class RowNotExists(GUIBaseException):
     """
     Raise when the given Row number is not exists in GUI
     """
 
 
-class WidgetValueError(GUIBaseException):
-    """
-    Raise when widget's value is empty.
-    """
 
 class DataValidationFailed(GUIBaseException):
     """
     Raise when widgets are data validation
     goes fail.
     """
-
-class LimitationError(GUIBaseException):
-    """
-    Raise when the input lower or greater than the
-    min and max value
-    """
-
 
 class TableCellNotFoundError(GUIBaseException):
     """

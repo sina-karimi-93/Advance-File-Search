@@ -21,7 +21,6 @@ from .widgets import MessageBox
 from lib.logic.search_algorithm import SearchProcess
 
 
-
 class FMain(Frame):
     """
     Main frame that includes other frames
@@ -121,14 +120,14 @@ class FCriteria(Frame):
                                             object_name="criteria",
                                             max_length=10000,
                                             
-                                            default_value="E:/")
+                                            default_value="E:/Test")
         
         self.targets_entry = LabelEntry(label="TARGETS",
                                         effect_color="#009187",
                                         object_name="criteria",
                                         effect_blur_radius=10,
                                         
-                                        default_value="aera")
+                                        default_value="python")
         
         self.search_in_files_checkbox = CheckBox(label="SEARCH IN FILES")
 
@@ -197,9 +196,9 @@ class FCriteria(Frame):
             if extensions:
                 extensions = extensions.split(",")
                 criteria["extensions"] = extensions
+        self.loading_animation.start()
         self.clear_result_callback()
         self.search_callback(criteria)
-        self.loading_animation.start()
 
     def stop_search_button_callback(self) -> None:
         """
@@ -213,8 +212,6 @@ class FCriteria(Frame):
         Stop search animation
         """
         self.loading_animation.stop()
-
-
 
 class FResult(Frame):
     """

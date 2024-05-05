@@ -6,8 +6,10 @@ from lib import QApplication
 from lib import QMainWindow
 from lib import load_css
 from lib import FMain
+from lib import QIcon
 from lib import CSS_COLORS_FILE_PATH
 from lib import CSS_FILE_PATH
+from lib import APP_ICON_PATH
 
 
 class WMain(QMainWindow):
@@ -35,8 +37,9 @@ class WMain(QMainWindow):
         """
 
         self.setGeometry(600, 400, 1300, 700)
+        self.setWindowIcon(QIcon(APP_ICON_PATH))
         self.setMinimumSize(1300, 700)
-        self.setWindowTitle("ADS")
+        self.setWindowTitle("Advance Search")
         self.setStyleSheet(self.theme)
 
 def run_app() -> None:

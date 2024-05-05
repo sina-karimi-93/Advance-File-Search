@@ -124,13 +124,13 @@ class Search:
         """
         for file_name in file_names:
             full_path = f"{dir_path}/{file_name}"
-            file_size = self.get_file_size(full_path)
             if self.compare(file_name, target):
                 yield {"file_name": full_path.replace("\\","/")}
             
             # Check in files
             if not self.in_file_search:
                 continue
+            file_size = self.get_file_size(full_path)
             if file_size > self.file_size_limit:
                 continue
             if not self.is_valid_extension(file_name):
@@ -231,6 +231,7 @@ class SearchWorkers:
                 result = search_handler(dir_path, file_names, targets)
                 self.add_to_finds(result)
             except StopIteration:
+                self.is_searching = False
                 break
         self.stop_working()
     
@@ -259,6 +260,8 @@ class SearchWorkers:
             if self.is_finished:
                 self.finish_search_callback()
                 self.is_finished = False
+                for thread in self.threads:
+                    thread.join()
 
     def stop_searching(self) -> None:
         """
