@@ -6,7 +6,6 @@ import re
 from time import strftime
 from pprint import pprint
 from traceback import print_tb
-from ..errors import InvalidLogLevel
 
 
 def void_function(*args, **kwargs) -> None:
@@ -45,7 +44,7 @@ class Logger:
                  *args,
                  pretty: bool = False,
                  level: str = 1,
-                 color: str = "default",
+                 color: str = "yellow",
                  **kwargs):
         """
         debug print the args and error traceback base on the detail level
@@ -135,7 +134,7 @@ class Logger:
              InvalidLogLevel
         """
         if not self.levels.get(level):
-            raise InvalidLogLevel(f"invalid level -> <{level}>")
+            raise ValueError(f"invalid level -> <{level}>")
         self.levels[level]
         self.levels[level] = self.void_function
 
@@ -153,8 +152,8 @@ class Logger:
         """
         self.pretty_printer = print
 
-
 log = Logger()
+
 log.disable_log_level(2)
 log.disable_log_level(3)
 

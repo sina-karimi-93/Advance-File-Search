@@ -134,7 +134,7 @@ class FCriteria(Frame):
 
         self.max_file_size_entry = LabelEntry(label="MAX FILE SIZE",
                                                validator="int",
-                                               default_value=10,
+                                               default_value=2,
                                                tool_tip="Size in megabyte. Note that specifying large file size can slow the machine.",
                                                effect_color="#009187",
                                                object_name="criteria",

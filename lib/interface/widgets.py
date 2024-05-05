@@ -1,37 +1,28 @@
 """
-Module contains all the widgets class to create UI with Qt library
+Module contains all the widgets class to
+create UI with Qt library
 """
-from datetime import datetime
-from typing import Any
 from typing import Union
 from typing import NewType
-from PyQt5.QtWidgets import QAbstractSpinBox
 from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QAbstractItemView
-from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QPushButton
-from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout as Vertical
 from PyQt5.QtWidgets import QHBoxLayout as Horizontal
-from PyQt5.QtWidgets import QSizePolicy
-from PyQt5.QtWidgets import QScrollArea
 from PyQt5.QtWidgets import QGroupBox
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtWidgets import QCheckBox
 from PyQt5.QtWidgets import QFrame
-from PyQt5.QtWidgets import QListWidget
-from PyQt5.QtWidgets import QCompleter
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QDateEdit
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QGraphicsOpacityEffect
 from PyQt5.QtGui import QCursor
@@ -43,7 +34,6 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import QRegExp
-from PyQt5.QtCore import QSortFilterProxyModel
 from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QObject
@@ -523,483 +513,6 @@ class DigitValidator:
         self.on_valid()
         return True
 
-class Combobox(QComboBox):
-    """
-    Custom sub class of Combobox
-    -> Params:
-          items
-          editable
-          callback_func
-          max_width
-          default_item
-          validator
-    @notes:
-         it will create a mapping from the given
-         items list to make the searching and setting
-         the value easier
-    """
-
-    _items_mapping = None
-
-    # TODO: for the future need to find a better way for the
-    # widget configs to avoid adding many arguments.
-    def __init__(
-        self,
-        items: list = None,
-        editable: bool = True,
-        callback_func: object = void_function,
-        default_item_index: int = 0,
-        default_item: str = None,
-        width: int = None,
-        min_width: int = None,
-        max_width: int = 10000,
-        max_length: int = 20,
-        tool_tip: str = None,
-        validator: object = None,
-        value_limit: tuple = None,
-        object_name: str = None,
-        not_zero: bool = True,
-        use_effect: bool = True,
-        effect_color: str = "#f89fa2",
-        effect_blur_radius: int = 15,
-        **kwargs,
-    ):
-        super().__init__(**kwargs)
-        self.items = items
-        self.editable = editable
-        self.setObjectName(object_name)
-        self.add_items(items)
-        self.setCurrentIndex(default_item_index)
-        self.setEditable(editable)
-        self.setup_completer()
-        self.setToolTip(tool_tip)
-        self.currentTextChanged.connect(callback_func)
-        self.currentTextChanged.connect(self.on_valid)
-        self.setMinimumWidth(min_width)
-        self.setMaximumWidth(max_width)
-        self.search_set(default_item)
-        if width:
-            self.setFixedWidth(width)
-
-        if editable:
-            self.lineEdit().setAlignment(Qt.AlignCenter)
-            self.lineEdit().setMaxLength(max_length)
-
-        if use_effect:
-            effect = QGraphicsDropShadowEffect(self)
-            effect.setColor(QColor(effect_color))
-            effect.setOffset(0, 0)
-            effect.setBlurRadius(effect_blur_radius)
-            self.setGraphicsEffect(effect)
-
-    def get_items(self) -> list:
-        """
-        Returns the all items that assigned
-        to the combobox.
-        """
-        return self.items
-
-
-    def on_invalid(self) -> None:
-        """
-        When something went wrong in this widget, for example
-        user leave the widget empty or add invalid value, then
-        change the widget status.
-        """
-        change_widget_status(self, status="error")
-
-    def on_valid(self) -> None:
-        """
-        After an error fixed in this widget, this method
-        change status of the widget to normal.
-        """
-        change_widget_status(self, status="normal")
-
-    def _create_mapping(self, items: list) -> None:
-        """
-        Create a mapping from items, key will be item
-        and the value will be index of item
-        """
-        self._items_mapping = {
-            str(value): index
-            for index, value in enumerate(items)
-        }
-
-    def search_set(self, key: str) -> None:
-        """
-        search through items mapping if its find
-        any match base on given key it will change
-        the CurrentIndex
-        -> Params:
-                key
-        """
-        try:
-            self.setCurrentIndex(self._items_mapping[key])
-        except KeyError as error:
-            message = f"key {key} not found Can't change current index"
-            log(message,
-                error=error,
-                level=3, 
-                color="red")
-
-    def add_items(self, items: list) -> None:
-        """
-        add items and the callback function to the
-        widget
-        -> Params:
-               items
-               callback_func
-        """
-        try:
-
-            self.clear()
-            self._create_mapping(items)
-            self.addItems([str(item) for item in items])
-        except TypeError as error:
-            log(error=error,
-                level=2, 
-                color="red")
-
-    def set_callbacks(self, *callbacks) -> None:
-        """
-        Set new callback for the combobox
-        """
-        for callback in callbacks:
-            self.currentTextChanged.connect(callback)
-
-    def get_value(self) -> str:
-        """
-        Return selected text.
-        """
-        value = self.currentText()
-        return value
-
-    def text(self) -> str:
-        """
-        return value of the widget. helper
-        function for the refactoring code.
-        """
-        return self.currentText()
-
-    def get_value_index(self) -> int:
-        """
-        Return selected index.
-        """
-        return self.currentIndex()
-
-    def setup_completer(self) -> None:
-        """
-        Setup auto completer for the  combobox.
-        it will start give suggestion when text changes inside the
-        combobox.
-        ------------------------------------------------------------
-        QCompleter(attributes):
-          setCompletionMode(options):
-                              0:PopupCompletion
-                                  Current completions are displayed in a popup window.
-                              1:InlineCompletion
-                                  Completions appear inline (as selected text).
-                              2:UnfilteredPopupCompletion
-                                  All possible completions are displayed in a popup window
-                                  with the most likely suggestion indicated as current.
-
-          setModelSorting(options):
-                              0:UnsortedModel
-                                  The model is unsorted.
-                              1:CaseSensitivelySortedModel
-                                  The model is sorted case sensitively.
-                              2:CaseInsensitivelySortedMode
-                                  The model is sorted case insensitively.
-
-        ----------------------------------------------------------------
-        QSortFilterProxyModel can be used for sorting items, filtering out items, or both.
-        The model transforms the structure of a source model by mapping the model indexes
-        it supplies to new indexes, corresponding to different locations, for views to use.
-        This approach allows a given source model to be restructured as far as views are
-        concerned without requiring any transformations on the underlying data,
-        and without duplicating the data in memory.
-        """
-        # added to pervemt qt error log
-        # Setting a QCompleter on non-editable QComboBox is not allowed.
-        # TODO: need to be tested
-        if not self.editable:
-            return
-        filter_model = QSortFilterProxyModel(self)
-        filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
-        # filter_model.fil
-        filter_model.setSourceModel(self.model())
-        completer = QCompleter(filter_model, self)
-        completer.setCompletionMode(QCompleter.PopupCompletion)
-        completer.setCaseSensitivity(2)
-        self.setCompleter(completer)
-
-    def mousePressEvent(self, event) -> None:
-        """
-        Make widget valid when user click on it
-        """
-        self.on_valid()
-        return super().mousePressEvent(event)
-
-class StringCombobox(Combobox):
-    """
-    This class is e Combobox class with string validators
-    and string validation.
-    """
-
-    def __init__(self, validator: str = "string", **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.currentTextChanged.connect(self.validate)
-        self.set_validator(validator)
-
-    def set_validator(self, validator: str) -> None:
-        """
-        Set validator to widget based on QIntValidator.
-        @args
-            value_limit:tuple
-        """
-        self.setValidator(RegxpValidator(pattern=VALIDATORS[validator]))
-
-    def validate(self) -> bool:
-        """
-        Validate this widget
-        """
-
-        value = self.currentText()
-        if not value:
-            self.on_invalid()
-            return "should not be empty."
-
-        if value[-1] == ",":
-            self.on_invalid()
-            return "should not ends with ',' sign."
-        self.on_valid()
-        return True
-
-class DigitCombobox(DigitValidator, Combobox):
-    """
-    Mixing class of DigitValidator and Combobox
-    to validate value of the widget(int, float)
-    """
-
-    def __init__(self, value_type: object, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.currentTextChanged.connect(self.validate)
-        self._type = value_type
-        self.not_zero = kwargs["not_zero"]
-
-class IntCombobox(DigitCombobox):
-    """
-    Int Combobox will validate and return int value type
-    """
-
-    def __init__(self, value_limit: list, **kwargs) -> None:
-        super().__init__(value_type=int, **kwargs)
-        self.setValidator(IntValidator(value_limit[0], value_limit[1]))
-
-class FloatCombobox(DigitCombobox):
-    """
-    Float Combobox will validate and return float value
-    """
-
-    def __init__(self, value_limit: list, **kwargs) -> None:
-        super().__init__(value_type=float, **kwargs)
-        self.setValidator(
-            DoubleValidator(float(value_limit[0]), float(value_limit[1]), 20,
-                            self))
-
-class LabelCombobox(Frame):
-    """
-    A custom widget class contains a label and a combobox.
-    params ->
-            label:str
-            items:list
-                 -> meta value used when the actual selected
-                    value is different than the displayed one
-            editable:bool
-            callback_func -> object
-            default_item
-            status_tip
-            layout
-            max_width
-            validator
-            validate
-    Note:
-        comboboxes should have initial items like empty list
-        for binding the currentTextChange callback,if items are
-        None, callback function will never work!!!!!!!!
-    """
-
-    widget_type = {
-        "string": StringCombobox,
-        "uppercase_string": StringCombobox,
-        "int": IntCombobox,
-        "decimal": FloatCombobox
-    }
-
-    def __init__(
-        self,
-        label: str,
-        layout: object = Vertical,
-        items: list = [],
-        editable: bool = True,
-        default_item_index: int = 0,
-        default_item: str = None,
-        status_tip: str = None,
-        callback_func: object = void_function,
-        width: int = None,
-        min_width: int = 80,
-        max_width: int = 10000,
-        frame_width: int = 0,
-        max_length: int = 20,
-        value_limit: tuple = (0, 2147483647),
-        validator: str = None,
-        grid_positions: tuple = None,
-        tool_tip: str = None,
-        object_name: str = None,
-        not_zero: bool = None,
-        align_center:bool = False,
-        use_effect: bool = True,
-        effect_color: str = "#f89fa2",
-        effect_blur_radius: int = 15,
-        **kwargs,
-    ):
-        super().__init__(layout=layout, **kwargs)
-        self.setStatusTip(status_tip)
-        self.grid_positions = grid_positions
-        self.setObjectName(object_name)
-        self.label = Label(label=label)
-        self.label.setAlignment(Qt.AlignCenter)
-        if align_center:
-            self.main_layout.setAlignment(Qt.AlignCenter)
-
-        self.combobox = self.widget_type.get(validator, Combobox)(
-            min_width=min_width,
-            max_width=max_width,
-            width=width,
-            max_length=max_length,
-            value_limit=value_limit,
-            items=items,
-            editable=editable,
-            callback_func=callback_func,
-            default_item_index=default_item_index,
-            default_item=default_item,
-            validator=validator,
-            tool_tip=tool_tip,
-            object_name=object_name,
-            not_zero=not_zero,
-            use_effect=use_effect,
-            effect_color=effect_color,
-            effect_blur_radius=effect_blur_radius)
-        if frame_width:
-            self.setFixedWidth(frame_width)
-    
-    def get_items(self) -> list:
-        """
-        Returns the combobox all items.
-        """
-        return self.combobox.get_items()
-
-    def on_invalid(self) -> None:
-        """
-        When something went wrong in this widget, for example
-        user leave the widget empty or add invalid value, then
-        change the widget status.
-        """
-        self.combobox.on_invalid()
-
-    def on_valid(self) -> None:
-        """
-        After an error fixed in this widget, this method
-        change status of the widget to normal.
-        """
-        self.combobox.on_valid()
-
-    def set_editable(self, editable: bool) -> None:
-        """
-        Change editable of the combobox
-        """
-        self.combobox.setEditable(editable)
-
-    def set_callbacks(self, *callbacks) -> None:
-        """
-        Set new callback for the combobox
-        """
-        self.combobox.set_callbacks(*callbacks)
-
-    def clear_value(self) -> None:
-        """
-        Clear selected value
-        """
-        self.combobox.setCurrentIndex(0)
-
-    def clear_items(self) -> None:
-        self.combobox.clear()
-
-    def set_value(self, value: str, index: int = 0) -> None:
-        """
-        Insert new value to item list of combobox
-        -> Params:
-               value
-               index: default is 0
-        """
-        self.combobox.setItemText(index, value)
-        self.combobox.setCurrentIndex(0)
-
-    def search_set(self, value: str) -> None:
-        """
-        Automatically set index of the combobbox base on the
-        given value.the mapping of the value will be carated
-        during the class initialization
-        ----------------------------------------------
-        -> Params:
-                value
-        """
-        self.combobox.search_set(value)
-
-    def set_exists(self, value: str) -> None:
-        """
-        Search trough combobox items and change
-        the index of combobox if the value is
-        inside the items list
-        -> Params:
-              value: str
-        """
-        self.combobox.search_set(value)
-
-    def add_items(self, items: list) -> None:
-        """
-        -> Params:
-                 items: list of items (all elements must be string)
-        # todo add convert to string functionalty
-        # to automatically convert all data types to string
-        """
-        self.combobox.add_items(items)
-
-    def get_value(self) -> str:
-        """
-        Return combobox value
-        """
-        return self.combobox.get_value()
-
-    def get_value_index(self) -> int:
-        """
-        Return selected index.
-        """
-        return self.combobox.currentIndex()
-
-    def validate(self) -> bool:
-        """
-        Validate the combobox
-        """
-
-        return self.combobox.validate()
-
-    def set_validate_method(self, method: callable) -> None:
-        """
-        Set new validate method
-        """
-        self.combobox.validate = method
-
 class Entry(QLineEdit):
     """
     Customized QLineEdit Subclass
@@ -1138,42 +651,6 @@ class Entry(QLineEdit):
         self.on_valid()
         return super().mousePressEvent(event)
 
-class StringEntry(Entry):
-    """
-    This class is e Entry class with string validators
-    and string validation.
-    """
-
-    def __init__(self, validator: str = "string", **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.textChanged.connect(self.validate)
-        self.set_validator(validator)
-
-    def set_validator(self, validator: str) -> None:
-        """
-        Set validator to widget based on QIntValidator.
-        @args
-            value_limit:tuple
-        """
-        self.setValidator(RegxpValidator(pattern=VALIDATORS[validator]))
-
-    def validate(self) -> bool:
-        """
-        Validate this widget
-        """
-
-        value = self.text()
-        if not value:
-            self.on_invalid()
-            return "should not be empty."
-
-        if value[-1] == ",":
-            self.on_invalid()
-            return "should not ends with ',' sign."
-
-        self.on_valid()
-        return True
-
 class DigitEntry(DigitValidator, Entry):
     """
     Mixing class of DigitValidator and Entry widget
@@ -1194,17 +671,6 @@ class IntEntry(DigitEntry):
         super().__init__(value_type=int, **kwargs)
         self.setValidator(IntValidator(value_limit[0], value_limit[1]))
 
-class FloatEntry(DigitEntry):
-    """
-    Float Entry will accept and return float value
-    """
-
-    def __init__(self, value_limit: tuple, **kwargs) -> None:
-        super().__init__(value_type=float, **kwargs)
-        self.setValidator(
-            DoubleValidator(float(value_limit[0]), float(value_limit[1]), 20,
-                            self))
-
 class LabelEntry(Frame):
     """
     Labeled Entry .is a frame contains entry
@@ -1220,21 +686,9 @@ class LabelEntry(Frame):
     """
 
     widget_type = {
-        "string": StringEntry,
-        "email": StringEntry,
-        "username": StringEntry,
-        "uppercase_string": StringEntry,
-        "section_names": StringEntry,
-        "string_with_hiphen": StringEntry,
-        "string_multiple_int": StringEntry,
-        "section_name_pattern": StringEntry,
         "int": IntEntry,
-        "decimal": FloatEntry
     }
 
-    #TODO: we taking to many argument, need to refactor again,
-    # for example 99% of the entry not going to use is_password flag or 
-    # value limit because their type is string.
     def __init__(
         self,
         label: str,
@@ -1356,41 +810,6 @@ class LabelEntry(Frame):
         Disconnect all entry's callback.
         """
         self.entry.disconnect()
-
-class ScrollArea(QScrollArea):
-    """
-    Custom QScrollArea
-    """
-
-    def __init__(self,
-                 child: object = None,
-                 object_name: str = None,
-                 **kwargs):
-        super().__init__(**kwargs)
-
-        self.setWidgetResizable(True)
-        self.setObjectName(object_name)
-        # self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        if child:
-            self.setWidget(child)
-
-    def set_widget(self, child: object) -> None:
-        """
-        Set child for scroll area
-        """
-        self.setWidget(child)
-
-    def get_widget(self) -> object:
-        """
-        return child widget
-        """
-        return self.widget()
-
-    def validate_widgets(self) -> bool:
-        """
-        validate child widgets
-        """
-        return self.child.validate_widgets()
 
 class Menu(QMenu):
     """
@@ -1730,93 +1149,6 @@ class HorizontalTable(Table):
         self.horizontalHeader().hide()
         self.clear()
 
-class ListBox(QListWidget):
-    """
-    Custom subclass of QList Widget
-    -> Params:
-           items: list of the items
-           callback_func
-    """
-
-    def __init__(self,
-                 items: list,
-                 callback_func: object = None,
-                 width: int = None,
-                 object_name: str = None,
-                 grid_positions: tuple = None,
-                 is_enable: bool = True,
-                 **kw):
-        super().__init__(**kw)
-        self.add_item(items)
-        self.clicked.connect(callback_func)
-        self.setObjectName(object_name)
-        if width:
-            self.setFixedWidth(width)
-        self.setEnabled(is_enable)
-        self.grid_positions = grid_positions
-
-    def add_item(self, items: list) -> None:
-        """
-        add items to the list box
-        -> Params:
-                items
-        """
-        self.clear()
-        for item in items:
-            self.addItem(str(item))
-
-    def set_callback(self, *callbacks) -> None:
-        """
-        Set new callback for the listbox
-        """
-        for callback in callbacks:
-            self.clicked.connect(callback)
-
-    def get_value(self) -> Any:
-        """
-        Return value of the selected  item
-        """
-        try:
-            return self.currentItem().text()
-        except AttributeError as e:
-            return None
-
-    def clear_value(self) -> None:
-        """
-        Clear the listbox values
-        """
-        self.clear()
-
-    def set_item(self, index: int) -> None:
-        """
-        Set the current selected item by index.
-        """
-        self.setCurrentRow(index)
-
-    def set_current_row(self, row) -> None:
-        """
-        Set the current row of the listbox.
-
-        @args:
-            row:int
-        """
-        self.setCurrentRow(row)
-
-    def set_enable(self, is_enable: bool) -> None:
-        """
-        Enable/Disable the listbox
-        """
-        self.setEnabled(is_enable)
-
-    def unselect(self) -> None:
-        """
-        Unselect the listbox items
-        """
-        for i in range(self.count()):
-            item = self.item(i)
-            item.setSelected(False)
-
-
 class CheckBox(QCheckBox):
     """
     Custom QtCheckbox widget
@@ -1876,58 +1208,6 @@ class CheckBox(QCheckBox):
         change the css object name on when is unchecked
         """
         self.setObjectName("invalid")
-
-
-
-class DateEntry(Frame):
-
-    def __init__(self,
-                 label: str = "",
-                 default_date: datetime = datetime.now(),
-                 layout: object = Vertical,
-                 align_center: bool = True,
-                 width: int = 280,
-                 frame_width: int = 0,
-                 calendarPopup: bool = False,
-                 callback_func: callable = void_function,
-                 use_effect: bool = True,
-                 effect_color: str = "#f89fa2",
-                 effect_blur_radius: int = 15) -> None:
-        super().__init__(layout=layout)
-        if align_center:
-            self.main_layout.setAlignment(Qt.AlignCenter)
-        if frame_width:
-            self.setFixedWidth(frame_width)
-        self.label = Label(label=label)
-        self.date_entry = QDateEdit(calendarPopup=calendarPopup)
-        self.date_entry.setDisplayFormat("dd/MM/yyyy")
-        self.date_entry.setMinimumWidth(width)
-        self.date_entry.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.date_entry.setAlignment(Qt.AlignCenter)
-        self.date_entry.setDateTime(default_date)
-        self.date_entry.dateChanged.connect(callback_func)
-        if use_effect:
-            effect = QGraphicsDropShadowEffect(self.date_entry)
-            effect.setColor(QColor(effect_color))
-            effect.setOffset(0, 0)
-            effect.setBlurRadius(effect_blur_radius)
-            self.date_entry.setGraphicsEffect(effect)
-        
-    def get_value(self) -> datetime:
-        """
-        Returns the date entry value as datetime
-        object.
-        """
-        return datetime(*self.date_entry.date().getDate())
-    
-class Stretch(QWidget):
-
-    def __init__(self,
-                 horizontal_stretch: QSizePolicy = QSizePolicy.Expanding,
-                 vertical_stretch: QSizePolicy = QSizePolicy.Preferred) -> None:
-        super().__init__()
-        self.setSizePolicy(horizontal_stretch, vertical_stretch)
-
 
 class TextAnimation(Frame):
     """
@@ -2047,13 +1327,3 @@ class TextAnimation(Frame):
         self.animation.setStartValue(start_value)
         self.animation.setEndValue(end_value)
 
-
-
-WIDGETS_LIST = {
-    "entry": LabelEntry,
-    "combobox": LabelCombobox,
-}
-
-VALIDATORS = {
-    "string": ONLY_STRING_SPACE_PATTERN
-}

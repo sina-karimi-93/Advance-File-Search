@@ -6,156 +6,8 @@ import os
 from time import sleep
 from typing import Callable
 from typing import Generator
-from traceback import print_tb
-from pprint import pprint
-from time import strftime
-from threading import Thread, Lock
-
-class Logger:
-    """
-    act as advance print function for debugging the code
-    ----------------------------------------------------
-    @properties
-            debug: activate and deactivate output
-            level: level of printing details
-    @methods
-
-    """
-    colors = {
-        "default": '\033[0m',
-        "red": '\033[91m',
-        "green": '\033[92m',
-        "blue": '\033[94m',
-        "yellow": '\033[93m',
-        "purple": '\033[95m',
-        "cyan": '\033[96m',
-    }
-    debug = True
-    level = 1
-    time_stamp_format = "[%H:%M:%S]:"
-
-    def __init__(self) -> None:
-        self.levels = {1: self.level_one,
-                       2: self.level_two,
-                       3: self.level_three}
-        self.pretty_printer = pprint
-    
-    def __call__(self,
-                 *args,
-                 pretty: bool = False,
-                 level: str = 1,
-                 color: str = "yellow",
-                 **kwargs):
-        """
-        debug print the args and error traceback base on the detail level
-        -------------------------------------------------------------------
-        -> Params:
-                prrety:
-                        pprint the args
-                level:
-                        level_one:
-                                normal print with time stamp
-                        level_two:
-                                details of the catched error
-                                with line and cause of error
-        """
-        if not self.debug:
-            return
-        try:
-            self.levels[level](pretty=pretty, color=color, *args, **kwargs)
-        except KeyError as err:
-            print(self.colors["default"], err)
-            raise SystemError("Invalid Level name for debugging")
-
-    def level_one(self,
-                  *args,
-                  pretty: bool,
-                  color: str,
-                  **kwargs) -> None:
-        """
-        print given argument with time stamp
-        """
-        time_stamp = strftime(self.time_stamp_format)
-        if pretty:
-            print(self.colors[color], time_stamp, end="\t")
-            self.pretty_printer(*args)
-            print(self.colors["default"], end="")
-            return
-        print(self.colors[color],
-              time_stamp,
-              *args,
-              self.colors["default"])
-
-    def level_two(self,
-                  *args,
-                  error: object,
-                  pretty: bool,
-                  color: str) -> None:
-        """
-        print traceback of the catched error from try,
-        except block
-        ----------------------------------------------
-        -> Params:
-                *args
-                 error: object,
-                 pretty: bool,
-                 color: str
-        """
-        self.level_one(*args, error, pretty=pretty, color=color)
-        print_tb(error.__traceback__)
-
-    def level_three(self,
-                    *args,
-                    pretty: bool,
-                    color: str,
-                    **kwargs) -> None:
-        """
-        Print debugging messages
-        -------------------------------------------------
-        -> Params:
-                *args
-                 error
-        """
-        self.level_one(*args, pretty=pretty, color=color, **kwargs)
-
-    def disable_logger(self) -> None:
-        """
-        disable the debug mode
-        """
-        self.debug = False
-
-    def disable_log_level(self, level: int) -> None:
-        """
-        disable logger base on the give level
-        --------------------------------------
-        -> Params:
-                level
-        @raises:
-             InvalidLogLevel
-        """
-        if not self.levels.get(level):
-            raise ValueError(f"invalid level -> <{level}>")
-        self.levels[level]
-        self.levels[level] = self.void_function
-
-    def void_function(self, *args, **kwargs) -> None:
-        """
-        replace function for log leves when
-        we want to disable logger base on function levels
-        """
-
-    def compile_mode(self) -> None:
-        """
-        change default ouput to normal print fucntion.
-        there is bug with python pprint module, which is
-        cause program crash after compilation
-        """
-        self.pretty_printer = print
-
-
-log = Logger()
-
-
+from threading import Thread
+from threading import Lock
 
 class Search:
     
@@ -273,22 +125,23 @@ class Search:
         for file_name in file_names:
             full_path = f"{dir_path}/{file_name}"
             file_size = self.get_file_size(full_path)
-            if file_size > self.file_size_limit:
-                continue
             if self.compare(file_name, target):
                 yield {"file_name": full_path.replace("\\","/")}
+            
+            # Check in files
             if not self.in_file_search:
                 continue
-            sleep(0.05)
+            if file_size > self.file_size_limit:
+                continue
             if not self.is_valid_extension(file_name):
                 continue
             try:
                 with open(full_path, "r") as file:
                     if target.lower() in file.read().lower():
-                        yield {"in_file": full_path}
-                
+                        yield {"in_file": full_path}   
             except UnicodeDecodeError:
                 pass
+            sleep(0.01)
 
     def is_valid_extension(self, file_name: str):
         """
@@ -327,6 +180,7 @@ class SearchWorkers:
                  finish_search_callback: Callable,
                  threads_count: int = 16) -> None:
         self.is_searching = False
+        self.is_finished = False
         self.threads_count = threads_count
         self.lock = Lock()
         self.signal_callback = signal_callback
@@ -345,10 +199,11 @@ class SearchWorkers:
             search_handler:
         """
         self.is_searching = True
-        threads = [Thread(target=self.worker,
+        self.is_finished = True
+        self.threads = [Thread(target=self.worker,
                   args=[search_handler, targets, paths])
                   for _ in range(self.threads_count)]
-        for thread in threads:
+        for thread in self.threads:
             thread.daemon = True
             thread.start()
     
@@ -377,7 +232,7 @@ class SearchWorkers:
                 self.add_to_finds(result)
             except StopIteration:
                 break
-        self.finish_search_callback()
+        self.stop_working()
     
     def add_to_finds(self, result: Generator) -> None:
         """
@@ -393,6 +248,17 @@ class SearchWorkers:
             self.signal_callback(result)
         except StopIteration:
             pass
+    
+    def stop_working(self) -> None:
+        """
+        To prevent all threads call the finish
+        callback this method checks to call it
+        just once.
+        """
+        with self.lock:
+            if self.is_finished:
+                self.finish_search_callback()
+                self.is_finished = False
 
     def stop_searching(self) -> None:
         """
@@ -400,6 +266,7 @@ class SearchWorkers:
         to false to stop the threads working.
         """
         self.is_searching = False
+            
 
 class SearchProcess:
     """
